@@ -8,32 +8,24 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-  .card { background: #16213e; border-radius: 20px; padding: 30px 40px; width: 820px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-  h1 { font-size: 22px; color: #aaa; margin-bottom: 25px; letter-spacing: 2px; text-align: center; }
-  .main-row { display: flex; gap: 35px; align-items: stretch; }
-  .left-panel { flex: 0 0 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
-  .status-ring { width: 110px; height: 110px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; transition: all 0.3s; border: 5px solid #555; flex-shrink: 0; }
+  .card { background: #16213e; border-radius: 20px; padding: 40px; width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); text-align: center; }
+  h1 { font-size: 22px; color: #aaa; margin-bottom: 25px; letter-spacing: 2px; }
+  .status-row { display: flex; align-items: center; justify-content: center; gap: 25px; margin-bottom: 20px; }
+  .status-ring { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; transition: all 0.3s; border: 5px solid #555; flex-shrink: 0; }
   .status-ring.safe { border-color: #2ecc71; color: #2ecc71; background: rgba(46,204,113,0.08); }
   .status-ring.danger { border-color: #e74c3c; color: #e74c3c; background: rgba(231,76,60,0.08); animation: pulse 0.8s ease-in-out infinite; }
   @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-  .status-text { text-align: center; }
-  .status-text h2 { font-size: 16px; margin-bottom: 4px; }
-  .status-text p { font-size: 12px; color: #888; }
-  .right-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  .chart-wrap { flex: 1; min-height: 200px; }
-  .slider-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 0 4px; }
-  .slider-row label { font-size: 13px; color: #888; white-space: nowrap; }
-  .slider-row input[type="range"] { flex: 1; accent-color: #e74c3c; cursor: pointer; }
-  .slider-row input[type="number"] { width: 60px; background: #0f3460; border: 1px solid #333; color: #eee; padding: 4px 8px; border-radius: 6px; font-size: 13px; text-align: center; }
-  .slider-row span { font-size: 13px; color: #888; }
-  .log-toggle { background: none; border: 1px solid #333; color: #888; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; margin-top: 12px; transition: 0.2s; }
+  .status-text h2 { font-size: 18px; margin-bottom: 2px; }
+  .status-text p { font-size: 13px; color: #888; }
+  .chart-wrap { margin: 15px 0; }
+  .log-toggle { background: none; border: 1px solid #333; color: #888; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; margin-top: 10px; transition: 0.2s; }
   .log-toggle:hover { border-color: #555; color: #ccc; }
-  .log-panel { display: none; background: #0f3460; border-radius: 12px; padding: 15px; max-height: 180px; overflow-y: auto; text-align: left; font-size: 13px; font-family: monospace; margin-top: 8px; }
+  .log-panel { display: none; background: #0f3460; border-radius: 12px; padding: 15px; max-height: 200px; overflow-y: auto; text-align: left; font-size: 13px; font-family: monospace; margin-top: 8px; }
   .log-panel.open { display: block; }
   .log-panel div { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
   .log-panel .detected { color: #e74c3c; }
   .log-panel .clear { color: #2ecc71; }
-  .conn-status { font-size: 12px; margin-top: 12px; text-align: center; }
+  .conn-status { font-size: 12px; margin-top: 12px; }
   .conn-status.online { color: #2ecc71; }
   .conn-status.offline { color: #e74c3c; }
 </style>
@@ -41,25 +33,15 @@
 <body>
 <div class="card">
   <h1>IR OBSTACLE SENSOR</h1>
-  <div class="main-row">
-    <div class="left-panel">
-      <div class="status-ring" id="statusRing">—</div>
-      <div class="status-text">
-        <h2 id="statusLabel">Waiting...</h2>
-        <p id="statusSub">0 events</p>
-      </div>
+  <div class="status-row">
+    <div class="status-ring" id="statusRing">—</div>
+    <div class="status-text" style="text-align:left">
+      <h2 id="statusLabel">Waiting...</h2>
+      <p id="statusSub">0 events</p>
     </div>
-    <div class="right-panel">
-      <div class="chart-wrap">
-        <canvas id="chart"></canvas>
-      </div>
-      <div class="slider-row">
-        <label>Window:</label>
-        <input type="range" id="windowSlider" min="5" max="120" value="15">
-        <input type="number" id="windowInput" min="5" max="120" value="15">
-        <span>seconds</span>
-      </div>
-    </div>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="chart"></canvas>
   </div>
   <button class="log-toggle" id="logToggle">▼ Show event log</button>
   <div class="log-panel" id="logPanel"></div>
@@ -68,9 +50,9 @@
 
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <script>
-let WINDOW_SECONDS = 15;
-let bins = Array(WINDOW_SECONDS).fill(0);
-let labels = Array(WINDOW_SECONDS).fill("").map((_, i) => `${-(WINDOW_SECONDS-1-i)}s`);
+const MINUTES = 15;
+const bins = Array(MINUTES).fill(0);
+const labels = Array(MINUTES).fill("").map((_, i) => `${-(MINUTES-1-i)}m`);
 
 const ctx = document.getElementById("chart").getContext("2d");
 const chart = new Chart(ctx, {
@@ -78,7 +60,7 @@ const chart = new Chart(ctx, {
   data: {
     labels,
     datasets: [{
-      label: "Detections",
+      label: "Detections / min",
       data: bins,
       backgroundColor: "rgba(231,76,60,0.5)",
       borderColor: "#e74c3c",
@@ -89,7 +71,6 @@ const chart = new Chart(ctx, {
   options: {
     responsive: true,
     maintainAspectRatio: false,
-    animation: { duration: 200 },
     plugins: { legend: { display: false } },
     scales: {
       x: {
@@ -111,11 +92,9 @@ const sub = document.getElementById("statusSub");
 const logPanel = document.getElementById("logPanel");
 const logToggle = document.getElementById("logToggle");
 const connStatus = document.getElementById("connStatus");
-const windowSlider = document.getElementById("windowSlider");
-const windowInput = document.getElementById("windowInput");
 
 let totalEvents = 0;
-let lastSecond = new Date().getSeconds();
+let lastMinute = new Date().getMinutes();
 let logOpen = false;
 
 logToggle.addEventListener("click", () => {
@@ -124,106 +103,16 @@ logToggle.addEventListener("click", () => {
   logToggle.textContent = logOpen ? "▲ Hide event log" : "▼ Show event log";
 });
 
-function rebuildChart(secs) {
-  WINDOW_SECONDS = secs;
-  bins = Array(WINDOW_SECONDS).fill(0);
-  labels = Array(WINDOW_SECONDS).fill("").map((_, i) => `${-(WINDOW_SECONDS-1-i)}s`);
-  chart.data.labels = labels;
-  chart.data.datasets[0].data = bins;
-  chart.update();
-  sub.textContent = `${totalEvents} events · ${bins.reduce((a,b) => a+b, 0)} detections last ${WINDOW_SECONDS}s`;
-}
-
 function shiftBins() {
-  for (let i = 0; i < WINDOW_SECONDS - 1; i++) bins[i] = bins[i + 1];
-  bins[WINDOW_SECONDS - 1] = 0;
+  for (let i = 0; i < MINUTES - 1; i++) bins[i] = bins[i + 1];
+  bins[MINUTES - 1] = 0;
 }
 
-function handleSensorData(raw, timestamp) {
-  const time = new Date(timestamp * 1000).toLocaleTimeString();
-  const isObstacle = raw.includes("obstacle=yes");
-  totalEvents++;
-
-  const nowSec = new Date().getSeconds();
-  if (nowSec !== lastSecond) {
-    lastSecond = nowSec;
-    shiftBins();
-  }
-
-  if (isObstacle) {
-    bins[WINDOW_SECONDS - 1]++;
-    ring.className = "status-ring danger";
-    ring.textContent = "⚠";
-    label.textContent = "OBSTACLE DETECTED";
-    logPanel.innerHTML = `<div class="detected">[${time}] Obstacle detected</div>` + logPanel.innerHTML;
-  } else {
-    ring.className = "status-ring safe";
-    ring.textContent = "✓";
-    label.textContent = "ALL CLEAR";
-    logPanel.innerHTML = `<div class="clear">[${time}] All clear</div>` + logPanel.innerHTML;
-  }
-
-  sub.textContent = `${totalEvents} events · ${bins.reduce((a,b) => a+b, 0)} detections last ${WINDOW_SECONDS}s`;
-  chart.update();
-
-  if (logPanel.children.length > 30) logPanel.removeChild(logPanel.lastChild);
-}
-
-windowSlider.addEventListener("input", () => {
-  const val = parseInt(windowSlider.value);
-  windowInput.value = val;
-  rebuildChart(val);
-});
-
-windowInput.addEventListener("change", () => {
-  let val = parseInt(windowInput.value);
-  val = Math.max(5, Math.min(120, val));
-  windowInput.value = val;
-  windowSlider.value = val;
-  rebuildChart(val);
-});
-
-// --- Simulation mode (offline demo) ---
-function startSimulation() {
-  connStatus.className = "conn-status online";
-  connStatus.textContent = "● Connected";
-
-  const TOTAL_MSGS = 180;
-  const INTERVAL_MS = 500;
-  const DETECTIONS = 20;
-  const MSGS = Array(TOTAL_MSGS).fill("obstacle=no");
-
-  const indices = new Set();
-  while (indices.size < DETECTIONS) {
-    indices.add(Math.floor(Math.random() * TOTAL_MSGS));
-  }
-  for (const i of indices) MSGS[i] = "obstacle=yes";
-
-  let i = 0;
-  function tick() {
-    if (i >= TOTAL_MSGS) return;
-    const startTime = (Date.now() - i * INTERVAL_MS) / 1000;
-    handleSensorData(MSGS[i], startTime);
-    i++;
-    setTimeout(tick, INTERVAL_MS);
-  }
-
-  setTimeout(tick, 500);
-}
-
-// --- MQTT Configuration ---
-// Replace these with your own HiveMQ Cloud credentials
-const MQTT_CONFIG = {
-  endpoint: "wss://792bbe975e73485e87707a342bce20bf.s1.eu.hivemq.cloud:8884/mqtt",
+const clientId = "dashboard_" + Math.random().toString(36).slice(2, 8);
+const client = mqtt.connect("wss://792bbe975e73485e87707a342bce20bf.s1.eu.hivemq.cloud:8884/mqtt", {
+  clientId,
   username: "arduino_bridge",
   password: "Sathvik7",
-  topic: "arduino/sensor/#",
-};
-
-const client = mqtt.connect(MQTT_CONFIG.endpoint, {
-  clientId: "dashboard_" + Math.random().toString(36).slice(2, 8),
-  username: MQTT_CONFIG.username,
-  password: MQTT_CONFIG.password,
   clean: true,
   reconnectPeriod: 5000,
 });
@@ -231,7 +120,7 @@ const client = mqtt.connect(MQTT_CONFIG.endpoint, {
 client.on("connect", () => {
   connStatus.className = "conn-status online";
   connStatus.textContent = "● Connected";
-  client.subscribe(MQTT_CONFIG.topic);
+  client.subscribe("arduino/sensor/#");
 });
 
 client.on("close", () => {
@@ -245,12 +134,36 @@ client.on("close", () => {
 client.on("message", (topic, payload) => {
   try {
     const data = JSON.parse(payload.toString());
-    handleSensorData(data.raw || "", data.timestamp || (Date.now() / 1000));
+    const raw = data.raw || "";
+    const time = new Date(data.timestamp * 1000).toLocaleTimeString();
+    const isObstacle = raw.includes("obstacle=yes");
+    totalEvents++;
+
+    const now = new Date().getMinutes();
+    if (now !== lastMinute) {
+      lastMinute = now;
+      shiftBins();
+    }
+
+    if (isObstacle) {
+      bins[MINUTES - 1]++;
+      ring.className = "status-ring danger";
+      ring.textContent = "⚠";
+      label.textContent = "OBSTACLE DETECTED";
+      logPanel.innerHTML = `<div class="detected">[${time}] Obstacle detected</div>` + logPanel.innerHTML;
+    } else {
+      ring.className = "status-ring safe";
+      ring.textContent = "✓";
+      label.textContent = "ALL CLEAR";
+      logPanel.innerHTML = `<div class="clear">[${time}] All clear</div>` + logPanel.innerHTML;
+    }
+
+    sub.textContent = `${totalEvents} events · ${bins.reduce((a,b) => a+b, 0)} detections last ${MINUTES}m`;
+    chart.update();
+
+    if (logPanel.children.length > 30) logPanel.removeChild(logPanel.lastChild);
   } catch (e) {}
 });
-
-// Start simulation after 2s if no real connection
-setTimeout(startSimulation, 2000);
 </script>
 </body>
 </html>
