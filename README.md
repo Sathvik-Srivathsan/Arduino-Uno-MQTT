@@ -60,7 +60,7 @@ This auto-detects the Arduino COM port, opens a serial connection, and publishes
 
 Open `dashboard.html` in a browser. It connects directly to HiveMQ Cloud via WebSocket and shows live status.
 
-![Dashboard](dashboard_ss.png)
+<img width="1064" height="814" alt="image" src="https://github.com/user-attachments/assets/e2ca356a-ca85-4644-bec2-338c790dd20c" />
 
 ## Data Flow
 
