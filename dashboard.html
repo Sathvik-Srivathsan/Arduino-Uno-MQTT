@@ -187,31 +187,25 @@ windowInput.addEventListener("change", () => {
 function startSimulation() {
   connStatus.className = "conn-status online";
   connStatus.textContent = "● Connected";
-  label.textContent = "ALL CLEAR";
-  ring.className = "status-ring safe";
-  ring.textContent = "✓";
 
-  let obstacleBurst = false;
-  let burstCount = 0;
+  const TOTAL_MSGS = 180;
+  const INTERVAL_MS = 500;
+  const DETECTIONS = 20;
+  const MSGS = Array(TOTAL_MSGS).fill("obstacle=no");
 
+  const indices = new Set();
+  while (indices.size < DETECTIONS) {
+    indices.add(Math.floor(Math.random() * TOTAL_MSGS));
+  }
+  for (const i of indices) MSGS[i] = "obstacle=yes";
+
+  let i = 0;
   function tick() {
-    let raw;
-    if (obstacleBurst && burstCount < 4) {
-      raw = "obstacle=yes";
-      burstCount++;
-      if (burstCount >= 4) obstacleBurst = false;
-    } else {
-      if (Math.random() < 0.15) {
-        obstacleBurst = true;
-        burstCount = 1;
-        raw = "obstacle=yes";
-      } else {
-        raw = "obstacle=no";
-      }
-    }
-
-    handleSensorData(raw, Date.now() / 1000);
-    setTimeout(tick, 400 + Math.random() * 600);
+    if (i >= TOTAL_MSGS) return;
+    const startTime = (Date.now() - i * INTERVAL_MS) / 1000;
+    handleSensorData(MSGS[i], startTime);
+    i++;
+    setTimeout(tick, INTERVAL_MS);
   }
 
   setTimeout(tick, 500);
