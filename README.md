@@ -10,6 +10,8 @@ Reads an IR obstacle sensor on an Arduino Uno and publishes detection events to 
 | IR Obstacle Avoidance Sensor | 1 |
 | Male-to-female jumper wires | 3 |
 
+No breadboard needed — wire directly.
+
 ### Wiring
 
 | Sensor | Arduino Uno |
@@ -18,9 +20,16 @@ Reads an IR obstacle sensor on an Arduino Uno and publishes detection events to 
 | GND | GND |
 | OUT | A2 |
 
+Adjust the potentiometer on the sensor to set the detection range. When an obstacle is within range, OUT goes LOW.
+
 ## Getting Started
 
-### 1. Upload Arduino Firmware
+### 1. Set Up HiveMQ Cloud
+
+1. Sign up at [console.hivemq.com](https://console.hivemq.com) (free serverless cluster, no credit card)
+2. Create a cluster and a set of MQTT credentials
+
+### 2. Upload Arduino Firmware
 
 1. Open `arduino_simple_test/arduino_simple_test.ino` in Arduino IDE
 2. Select **Board:** Arduino Uno, **Port:** (your COM port)
@@ -28,7 +37,7 @@ Reads an IR obstacle sensor on an Arduino Uno and publishes detection events to 
 
 The firmware reads the IR sensor on A2 every 500ms and sends `obstacle=yes` or `obstacle=no` over USB Serial at 9600 baud.
 
-### 2. Set Up Python
+### 3. Set Up Python
 
 ```bash
 python -m venv .venv
@@ -36,7 +45,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 3. Configure MQTT Credentials
+### 4. Configure MQTT Credentials
 
 Copy `.env.example` to `.env` and fill in your HiveMQ Cloud broker details:
 
@@ -48,19 +57,30 @@ MQTT_PASSWORD=your_password
 MQTT_TOPIC_PREFIX=arduino/sensor
 ```
 
-### 4. Run the Bridge
+### 5. Run the Bridge
 
 ```bash
 python bridge.py
 ```
 
-This auto-detects the Arduino COM port, opens a serial connection, and publishes every reading to HiveMQ Cloud topic `arduino/sensor/data`.
+Auto-detects the Arduino COM port, opens serial at 9600 baud, connects to HiveMQ Cloud via TLS on port 8883, and publishes each reading as JSON `{"raw": "...", "timestamp": ...}` to `arduino/sensor/data`.
 
-### 5. Open the Dashboard
+### 6. Run the Subscriber (optional)
 
-Open `dashboard.html` in a browser. It connects directly to HiveMQ Cloud via WebSocket and shows live status.
+```bash
+python subscriber.py
+```
 
-![Dashboard](dashboard_ss.png)
+Subscribes to `arduino/sensor/#` and prints every message to the terminal.
+
+### 7. Open the Dashboard
+
+Open `dashboard.html` in a browser. It connects to HiveMQ Cloud via WebSocket (WSS on port 8884) and shows:
+
+- **Status ring** — green ✓ (clear) or red ⚠ pulsing (obstacle)
+- **Bar chart** — rolling 15-minute detection rate
+- **Event log** — collapsible, shows each detection with timestamp
+- **Connection indicator** — online/offline
 
 ## Data Flow
 
@@ -70,6 +90,7 @@ Arduino (IR sensor on A2)
 bridge.py
   ↓ MQTT over TLS :8883
 HiveMQ Cloud Broker
-  ↓ WebSocket WSS :8884
-dashboard.html (browser)
+  ↙                      ↘
+subscriber.py         dashboard.html
+(terminal)             (browser, WSS :8884)
 ```
