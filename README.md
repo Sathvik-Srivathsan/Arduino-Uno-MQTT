@@ -82,6 +82,8 @@ Open `dashboard.html` in a browser. It connects to HiveMQ Cloud via WebSocket (W
 - **Event log** — collapsible, shows each detection with timestamp
 - **Connection indicator** — online/offline
 
+<img width="1064" height="814" alt="image" src="https://github.com/user-attachments/assets/e2ca356a-ca85-4644-bec2-338c790dd20c" />
+
 ## Data Flow
 
 ```
