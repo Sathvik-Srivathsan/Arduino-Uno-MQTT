@@ -1,23 +1,13 @@
 import paho.mqtt.client as mqtt
 import ssl
 import json
-import os
-import sys
 from datetime import datetime
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
-BROKER = os.environ.get("MQTT_BROKER")
-PORT = int(os.environ.get("MQTT_PORT", 8883))
-USERNAME = os.environ.get("MQTT_USERNAME")
-PASSWORD = os.environ.get("MQTT_PASSWORD")
-TOPIC = os.environ.get("MQTT_TOPIC_PREFIX", "arduino/sensor") + "/#"
-
-if not all([BROKER, USERNAME, PASSWORD]):
-    print("[ERROR] Missing MQTT credentials. Set MQTT_BROKER, MQTT_USERNAME, and MQTT_PASSWORD in .env or environment variables.")
-    sys.exit(1)
+BROKER = "792bbe975e73485e87707a342bce20bf.s1.eu.hivemq.cloud"
+PORT = 8883
+USERNAME = "arduino_bridge"
+PASSWORD = "Sathvik7"
+TOPIC = "arduino/sensor/#"
 
 
 def on_connect(client, userdata, flags, rc, properties=None):
