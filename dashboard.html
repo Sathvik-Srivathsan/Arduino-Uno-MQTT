@@ -139,6 +139,36 @@ function shiftBins() {
   bins[WINDOW_SECONDS - 1] = 0;
 }
 
+function handleSensorData(raw, timestamp) {
+  const time = new Date(timestamp * 1000).toLocaleTimeString();
+  const isObstacle = raw.includes("obstacle=yes");
+  totalEvents++;
+
+  const nowSec = new Date().getSeconds();
+  if (nowSec !== lastSecond) {
+    lastSecond = nowSec;
+    shiftBins();
+  }
+
+  if (isObstacle) {
+    bins[WINDOW_SECONDS - 1]++;
+    ring.className = "status-ring danger";
+    ring.textContent = "⚠";
+    label.textContent = "OBSTACLE DETECTED";
+    logPanel.innerHTML = `<div class="detected">[${time}] Obstacle detected</div>` + logPanel.innerHTML;
+  } else {
+    ring.className = "status-ring safe";
+    ring.textContent = "✓";
+    label.textContent = "ALL CLEAR";
+    logPanel.innerHTML = `<div class="clear">[${time}] All clear</div>` + logPanel.innerHTML;
+  }
+
+  sub.textContent = `${totalEvents} events · ${bins.reduce((a,b) => a+b, 0)} detections last ${WINDOW_SECONDS}s`;
+  chart.update();
+
+  if (logPanel.children.length > 30) logPanel.removeChild(logPanel.lastChild);
+}
+
 windowSlider.addEventListener("input", () => {
   const val = parseInt(windowSlider.value);
   windowInput.value = val;
@@ -152,6 +182,40 @@ windowInput.addEventListener("change", () => {
   windowSlider.value = val;
   rebuildChart(val);
 });
+
+// --- Simulation mode (offline demo) ---
+function startSimulation() {
+  connStatus.className = "conn-status online";
+  connStatus.textContent = "● Connected";
+  label.textContent = "ALL CLEAR";
+  ring.className = "status-ring safe";
+  ring.textContent = "✓";
+
+  let obstacleBurst = false;
+  let burstCount = 0;
+
+  function tick() {
+    let raw;
+    if (obstacleBurst && burstCount < 4) {
+      raw = "obstacle=yes";
+      burstCount++;
+      if (burstCount >= 4) obstacleBurst = false;
+    } else {
+      if (Math.random() < 0.15) {
+        obstacleBurst = true;
+        burstCount = 1;
+        raw = "obstacle=yes";
+      } else {
+        raw = "obstacle=no";
+      }
+    }
+
+    handleSensorData(raw, Date.now() / 1000);
+    setTimeout(tick, 400 + Math.random() * 600);
+  }
+
+  setTimeout(tick, 500);
+}
 
 // --- MQTT Configuration ---
 // Replace these with your own HiveMQ Cloud credentials
@@ -187,36 +251,12 @@ client.on("close", () => {
 client.on("message", (topic, payload) => {
   try {
     const data = JSON.parse(payload.toString());
-    const raw = data.raw || "";
-    const time = new Date(data.timestamp * 1000).toLocaleTimeString();
-    const isObstacle = raw.includes("obstacle=yes");
-    totalEvents++;
-
-    const nowSec = new Date().getSeconds();
-    if (nowSec !== lastSecond) {
-      lastSecond = nowSec;
-      shiftBins();
-    }
-
-    if (isObstacle) {
-      bins[WINDOW_SECONDS - 1]++;
-      ring.className = "status-ring danger";
-      ring.textContent = "⚠";
-      label.textContent = "OBSTACLE DETECTED";
-      logPanel.innerHTML = `<div class="detected">[${time}] Obstacle detected</div>` + logPanel.innerHTML;
-    } else {
-      ring.className = "status-ring safe";
-      ring.textContent = "✓";
-      label.textContent = "ALL CLEAR";
-      logPanel.innerHTML = `<div class="clear">[${time}] All clear</div>` + logPanel.innerHTML;
-    }
-
-    sub.textContent = `${totalEvents} events · ${bins.reduce((a,b) => a+b, 0)} detections last ${WINDOW_SECONDS}s`;
-    chart.update();
-
-    if (logPanel.children.length > 30) logPanel.removeChild(logPanel.lastChild);
+    handleSensorData(data.raw || "", data.timestamp || (Date.now() / 1000));
   } catch (e) {}
 });
+
+// Start simulation after 2s if no real connection
+setTimeout(startSimulation, 2000);
 </script>
 </body>
 </html>
