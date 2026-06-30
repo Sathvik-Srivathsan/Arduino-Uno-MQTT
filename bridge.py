@@ -5,13 +5,22 @@ import time
 import json
 import ssl
 import sys
+import os
 from datetime import datetime
 
-BROKER = "792bbe975e73485e87707a342bce20bf.s1.eu.hivemq.cloud"
-PORT = 8883
-USERNAME = "arduino_bridge"
-PASSWORD = "Sathvik7"
-TOPIC_PREFIX = "arduino/sensor"
+from dotenv import load_dotenv
+
+load_dotenv()
+
+BROKER = os.environ.get("MQTT_BROKER")
+PORT = int(os.environ.get("MQTT_PORT", 8883))
+USERNAME = os.environ.get("MQTT_USERNAME")
+PASSWORD = os.environ.get("MQTT_PASSWORD")
+TOPIC_PREFIX = os.environ.get("MQTT_TOPIC_PREFIX", "arduino/sensor")
+
+if not all([BROKER, USERNAME, PASSWORD]):
+    print("[ERROR] Missing MQTT credentials. Set MQTT_BROKER, MQTT_USERNAME, and MQTT_PASSWORD in .env or environment variables.")
+    sys.exit(1)
 
 RECONNECT_INTERVAL = 5
 
