@@ -26,7 +26,7 @@ Adjust the potentiometer on the sensor to set the detection range. When an obsta
 
 ### 1. Set Up HiveMQ Cloud
 
-1. Sign up at [console.hivemq.com](https://console.hivemq.com) (free serverless cluster, no credit card)
+1. Sign up at [console.hivemq.com](https://console.hivemq.com) (free serverless cluster)
 2. Create a cluster and a set of MQTT credentials
 
 ### 2. Upload Arduino Firmware
